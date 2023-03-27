@@ -13,7 +13,7 @@ include ../../../build/makelib/imagelight.mk
 
 img.build:
 	@$(INFO) docker build $(IMAGE)
-	@$(MAKE) BUILD_ARGS="--load" img.build.shared
+	@$(MAKE) BUILD_ARGS= img.build.shared
 	@$(OK) docker build $(IMAGE)
 
 img.publish:
@@ -24,7 +24,7 @@ img.publish:
 img.build.shared:
 	@cp Dockerfile $(IMAGE_TEMP_DIR) || $(FAIL)
 	@cp -r $(OUTPUT_DIR)/bin/ $(IMAGE_TEMP_DIR)/bin || $(FAIL)
-	@docker buildx build $(BUILD_ARGS) \
+	@docker build $(BUILD_ARGS) \
 		--platform $(IMAGE_PLATFORMS) \
 		-t $(IMAGE) \
 		$(IMAGE_TEMP_DIR) || $(FAIL)
