@@ -265,6 +265,17 @@ spec:
                       sseType:
                         type: string
                     type: object
+                  ttl:
+                    description: "TTL compares the current time in epoch time format
+                      to the time stored in the TTL attribute of an item.
+                      If the epoch time value stored in the attribute is less
+                      than the current time, the item is marked as expired and subsequently deleted."
+                    properties:
+                      enabled:
+                        type: boolean
+                      attributeName:
+                        type: string
+                    type: object
                   streamSpecification:
                     description: "The settings for DynamoDB Streams on the table.
                       These settings consist of: \n * StreamEnabled - Indicates whether

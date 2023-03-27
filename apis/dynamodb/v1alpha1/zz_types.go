@@ -677,6 +677,8 @@ type TableCreationParameters struct {
 	ProvisionedThroughput *ProvisionedThroughput `json:"provisionedThroughput,omitempty"`
 	// Represents the settings used to enable server-side encryption.
 	SSESpecification *SSESpecification `json:"sseSpecification,omitempty"`
+	// Represents the settings used to enable or disable Time to Live (TTL) for the specified table.
+	TimeToLiveSpecification *TimeToLiveSpecification `json:"timeToLiveSpecification,omitempty"`
 
 	TableName *string `json:"tableName,omitempty"`
 }
@@ -751,6 +753,7 @@ type TimeToLiveDescription struct {
 
 // +kubebuilder:skipversion
 type TimeToLiveSpecification struct {
+	Enabled *bool `json:"enabled,omitempty"`
 	AttributeName *string `json:"attributeName,omitempty"`
 }
 

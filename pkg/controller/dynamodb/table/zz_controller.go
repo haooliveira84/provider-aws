@@ -83,13 +83,19 @@ func (e *external) Observe(ctx context.Context, mg cpresource.Managed) (managed.
 	if err != nil {
 		return managed.ExternalObservation{ResourceExists: false}, awsclient.Wrap(cpresource.Ignore(IsNotFound, err), errDescribe)
 	}
+
+	ttl_input := GenerateDescribeTTLTableInput(cr)
+	ttl_resp, ttl_err := e.client.DescribeTimeToLiveWithContext(ctx, ttl_input)
+	if ttl_err != nil {
+		return managed.ExternalObservation{ResourceExists: false}, awsclient.Wrap(cpresource.Ignore(IsNotFound, err), errDescribe)
+	}
 	currentSpec := cr.Spec.ForProvider.DeepCopy()
-	if err := e.lateInitialize(&cr.Spec.ForProvider, resp); err != nil {
+	if err := e.lateInitialize(&cr.Spec.ForProvider, resp, ttl_resp); err != nil {
 		return managed.ExternalObservation{}, errors.Wrap(err, "late-init failed")
 	}
 	GenerateTable(resp).Status.AtProvider.DeepCopyInto(&cr.Status.AtProvider)
 
-	upToDate, err := e.isUpToDate(cr, resp)
+	upToDate, err := e.isUpToDate(cr, resp, ttl_resp)
 	if err != nil {
 		return managed.ExternalObservation{}, errors.Wrap(err, "isUpToDate check failed")
 	}
@@ -518,8 +524,8 @@ type external struct {
 	client         svcsdkapi.DynamoDBAPI
 	preObserve     func(context.Context, *svcapitypes.Table, *svcsdk.DescribeTableInput) error
 	postObserve    func(context.Context, *svcapitypes.Table, *svcsdk.DescribeTableOutput, managed.ExternalObservation, error) (managed.ExternalObservation, error)
-	lateInitialize func(*svcapitypes.TableParameters, *svcsdk.DescribeTableOutput) error
-	isUpToDate     func(*svcapitypes.Table, *svcsdk.DescribeTableOutput) (bool, error)
+	lateInitialize func(*svcapitypes.TableParameters, *svcsdk.DescribeTableOutput, *svcsdk.DescribeTimeToLiveOutput) error
+	isUpToDate     func(*svcapitypes.Table, *svcsdk.DescribeTableOutput, *svcsdk.DescribeTimeToLiveOutput) (bool, error)
 	preCreate      func(context.Context, *svcapitypes.Table, *svcsdk.CreateTableInput) error
 	postCreate     func(context.Context, *svcapitypes.Table, *svcsdk.CreateTableOutput, managed.ExternalCreation, error) (managed.ExternalCreation, error)
 	preDelete      func(context.Context, *svcapitypes.Table, *svcsdk.DeleteTableInput) (bool, error)
@@ -535,10 +541,10 @@ func nopPreObserve(context.Context, *svcapitypes.Table, *svcsdk.DescribeTableInp
 func nopPostObserve(_ context.Context, _ *svcapitypes.Table, _ *svcsdk.DescribeTableOutput, obs managed.ExternalObservation, err error) (managed.ExternalObservation, error) {
 	return obs, err
 }
-func nopLateInitialize(*svcapitypes.TableParameters, *svcsdk.DescribeTableOutput) error {
+func nopLateInitialize(*svcapitypes.TableParameters, *svcsdk.DescribeTableOutput, *svcsdk.DescribeTimeToLiveOutput) error {
 	return nil
 }
-func alwaysUpToDate(*svcapitypes.Table, *svcsdk.DescribeTableOutput) (bool, error) {
+func alwaysUpToDate(*svcapitypes.Table, *svcsdk.DescribeTableOutput, *svcsdk.DescribeTimeToLiveOutput) (bool, error) {
 	return true, nil
 }
 

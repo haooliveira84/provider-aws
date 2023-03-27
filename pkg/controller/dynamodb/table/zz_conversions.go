@@ -41,6 +41,19 @@ func GenerateDescribeTableInput(cr *svcapitypes.Table) *svcsdk.DescribeTableInpu
 	return res
 }
 
+// GenerateDescribeTableTTLInput returns input for read
+// operation.
+func GenerateDescribeTTLTableInput(cr *svcapitypes.Table) *svcsdk.DescribeTimeToLiveInput {
+	res := &svcsdk.DescribeTimeToLiveInput{}
+
+	if cr.Status.AtProvider.TableName != nil {
+		res.SetTableName(*cr.Status.AtProvider.TableName)
+	}
+
+	return res
+}
+
+
 // GenerateTable returns the current state in the form of *svcapitypes.Table.
 func GenerateTable(resp *svcsdk.DescribeTableOutput) *svcapitypes.Table {
 	cr := &svcapitypes.Table{}
@@ -392,6 +405,7 @@ func GenerateTable(resp *svcsdk.DescribeTableOutput) *svcapitypes.Table {
 // GenerateCreateTableInput returns a create input.
 func GenerateCreateTableInput(cr *svcapitypes.Table) *svcsdk.CreateTableInput {
 	res := &svcsdk.CreateTableInput{}
+	ttl_res := &svcsdk.UpdateTimeToLiveInput{}
 
 	if cr.Spec.ForProvider.AttributeDefinitions != nil {
 		f0 := []*svcsdk.AttributeDefinition{}
@@ -538,6 +552,16 @@ func GenerateCreateTableInput(cr *svcapitypes.Table) *svcsdk.CreateTableInput {
 			f6.SetSSEType(*cr.Spec.ForProvider.SSESpecification.SSEType)
 		}
 		res.SetSSESpecification(f6)
+	}
+	if cr.Spec.ForProvider.TimeToLiveSpecification != nil {
+		f8 := &svcsdk.TimeToLiveSpecification{}
+		if cr.Spec.ForProvider.TimeToLiveSpecification.Enabled != nil {
+			f8.SetEnabled(*cr.Spec.ForProvider.TimeToLiveSpecification.Enabled)
+		}
+		if cr.Spec.ForProvider.TimeToLiveSpecification.AttributeName != nil {
+			f8.SetAttributeName(*cr.Spec.ForProvider.TimeToLiveSpecification.AttributeName)
+		}
+		ttl_res.SetTimeToLiveSpecification(f8)
 	}
 	if cr.Spec.ForProvider.StreamSpecification != nil {
 		f7 := &svcsdk.StreamSpecification{}

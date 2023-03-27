@@ -153,6 +153,8 @@ type TableParameters struct {
 	StreamSpecification *StreamSpecification `json:"streamSpecification,omitempty"`
 	// The table class of the new table. Valid values are STANDARD and STANDARD_INFREQUENT_ACCESS.
 	TableClass *string `json:"tableClass,omitempty"`
+	// Represents the settings used to enable or disable Time to Live (TTL) for the specified table.
+	TimeToLiveSpecification *TimeToLiveSpecification `json:"timeToLiveSpecification,omitempty"`
 	// A list of key-value pairs to label the table. For more information, see Tagging
 	// for DynamoDB (https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Tagging.html).
 	Tags                  []*Tag `json:"tags,omitempty"`
@@ -202,6 +204,8 @@ type TableObservation struct {
 	RestoreSummary *RestoreSummary `json:"restoreSummary,omitempty"`
 	// The description of the server-side encryption status on the specified table.
 	SSEDescription *SSEDescription `json:"sseDescription,omitempty"`
+	// The description of the TTL status on the specified table.
+	TimeToLiveDescription *TimeToLiveDescription `json:"timeToLiveDescription,omitempty"`
 	// The Amazon Resource Name (ARN) that uniquely identifies the table.
 	TableARN *string `json:"tableARN,omitempty"`
 	// Contains details of the table class.

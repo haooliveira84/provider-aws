@@ -32,7 +32,19 @@ type CustomBackupParameters struct {
 }
 
 // CustomTableParameters are custom parameters for Table.
-type CustomTableParameters struct{}
+type CustomTableParameters struct {
+	// The name of the TTL attribute used to store the expiration time for items
+	// in the table.
+	//
+	// AttributeName is a required field
+	AttributeName *string `json:"attributeName,omitempty"`
+
+	// Indicates whether TTL is to be enabled (true) or disabled (false) on the
+	// table.
+	//
+	// Enabled is a required field
+	Enabled *bool `json:"enabled,omitempty"`
+}
 
 // CustomGlobalTableParameters are custom parameters for GlobalTable.
 type CustomGlobalTableParameters struct{}

@@ -284,6 +284,10 @@ func TestLateInitialize(t *testing.T) {
 						KMSMasterKeyID: aws.String("some-arn"),
 						SSEType:        aws.String("very-secure"),
 					},
+					TimeToLiveSpecification: &svcapitypes.TimeToLiveSpecification{
+						Enabled:       aws.Bool(true),
+						AttributeName: aws.String("some-param"),
+					},
 					StreamSpecification: &svcapitypes.StreamSpecification{
 						StreamEnabled:  aws.Bool(true),
 						StreamViewType: aws.String("the-good-type"),
@@ -317,6 +321,10 @@ func TestLateInitialize(t *testing.T) {
 						Enabled:        aws.Bool(true),
 						KMSMasterKeyID: aws.String("some-arn"),
 						SSEType:        aws.String("very-secure"),
+					},
+					TimeToLiveSpecification: &svcapitypes.TimeToLiveSpecification{
+						Enabled:       aws.Bool(true),
+						AttributeName: aws.String("some-param"),
 					},
 					StreamSpecification: &svcapitypes.StreamSpecification{
 						StreamEnabled:  aws.Bool(true),
@@ -383,6 +391,10 @@ func TestLateInitialize(t *testing.T) {
 						Enabled:        aws.Bool(true),
 						KMSMasterKeyID: aws.String("some-arn"),
 						SSEType:        aws.String("very-secure"),
+					},
+					TimeToLiveSpecification: &svcapitypes.TimeToLiveSpecification{
+						Enabled:       aws.Bool(true),
+						AttributeName: aws.String("some-param"),
 					},
 					StreamSpecification: &svcapitypes.StreamSpecification{
 						StreamEnabled:  aws.Bool(true),

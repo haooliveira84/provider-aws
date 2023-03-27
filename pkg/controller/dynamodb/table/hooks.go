@@ -164,7 +164,7 @@ func (e *tagger) Initialize(ctx context.Context, mg resource.Managed) error {
 	return errors.Wrap(e.kube.Update(ctx, cr), "cannot update Table Spec")
 }
 
-func lateInitialize(in *svcapitypes.TableParameters, t *svcsdk.DescribeTableOutput) error { // nolint:gocyclo,unparam
+func lateInitialize(in *svcapitypes.TableParameters, t *svcsdk.DescribeTableOutput, ou *svcsdk.DescribeTimeToLiveOutput) error { // nolint:gocyclo,unparam
 	if t == nil {
 		return nil
 	}
@@ -216,6 +216,15 @@ func lateInitialize(in *svcapitypes.TableParameters, t *svcsdk.DescribeTableOutp
 		}
 		if in.SSESpecification.SSEType == nil && t.Table.SSEDescription.SSEType != nil {
 			in.SSESpecification.SSEType = t.Table.SSEDescription.SSEType
+		}
+	}
+	if in.TimeToLiveSpecification != nil {
+		in.TimeToLiveSpecification = &svcapitypes.TimeToLiveSpecification{Enabled: aws.Bool(false, aws.FieldRequired)}
+		if in.TimeToLiveSpecification.Enabled == nil && ou.TimeToLiveDescription.TimeToLiveStatus != nil {
+			in.TimeToLiveSpecification.Enabled = aws.Bool(*ou.TimeToLiveDescription.TimeToLiveStatus == string(svcapitypes.TimeToLiveStatus_ENABLED))
+		}
+		if in.TimeToLiveSpecification.AttributeName == nil && ou.TimeToLiveDescription.AttributeName != nil {
+			in.TimeToLiveSpecification.AttributeName = ou.TimeToLiveDescription.AttributeName
 		}
 	}
 	if in.StreamSpecification == nil {
@@ -306,9 +315,9 @@ func buildLocalIndexes(indexes []*svcsdk.LocalSecondaryIndexDescription) []*svca
 // createPatch creates a *svcapitypes.TableParameters that has only the changed
 // values between the target *svcapitypes.TableParameters and the current
 // *dynamodb.TableDescription
-func createPatch(in *svcsdk.DescribeTableOutput, target *svcapitypes.TableParameters) (*svcapitypes.TableParameters, error) {
+func createPatch(in *svcsdk.DescribeTableOutput, target *svcapitypes.TableParameters, ou *svcsdk.DescribeTimeToLiveOutput) (*svcapitypes.TableParameters, error) {
 	currentParams := &svcapitypes.TableParameters{}
-	if err := lateInitialize(currentParams, in); err != nil {
+	if err := lateInitialize(currentParams, in, ou); err != nil {
 		return nil, err
 	}
 
@@ -323,7 +332,7 @@ func createPatch(in *svcsdk.DescribeTableOutput, target *svcapitypes.TableParame
 	return patch, nil
 }
 
-func isUpToDate(cr *svcapitypes.Table, resp *svcsdk.DescribeTableOutput) (bool, error) {
+func isUpToDate(cr *svcapitypes.Table, resp *svcsdk.DescribeTableOutput, ttl_resp *svcsdk.DescribeTimeToLiveOutput) (bool, error) {
 	// A table that's currently creating, deleting, or updating can't be
 	// updated, so we temporarily consider it to be up-to-date no matter
 	// what.
@@ -338,7 +347,11 @@ func isUpToDate(cr *svcapitypes.Table, resp *svcsdk.DescribeTableOutput) (bool, 
 		return true, nil
 	}
 
-	patch, err := createPatch(resp, &cr.Spec.ForProvider)
+	if cr.Status.AtProvider.TimeToLiveDescription != nil && aws.StringValue(cr.Status.AtProvider.TimeToLiveDescription.TimeToLiveStatus) == string(svcapitypes.TimeToLiveStatus_ENABLING) {
+		return true, nil
+	}
+
+	patch, err := createPatch(resp, &cr.Spec.ForProvider, ttl_resp)
 	if err != nil {
 		return false, err
 	}
@@ -396,8 +409,11 @@ func (e *updateClient) preUpdate(ctx context.Context, cr *svcapitypes.Table, u *
 	if err != nil {
 		return aws.Wrap(err, errDescribe)
 	}
-
-	p, err := createPatch(out, &cr.Spec.ForProvider)
+	ttl_out, ttl_err := e.client.DescribeTimeToLiveWithContext(ctx, &svcsdk.DescribeTimeToLiveInput{TableName: aws.String(meta.GetExternalName(cr))})
+	if ttl_err != nil {
+		return aws.Wrap(err, errDescribe)
+	}
+	p, err := createPatch(out, &cr.Spec.ForProvider, ttl_out)
 	if err != nil {
 		return err
 	}
