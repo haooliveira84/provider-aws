@@ -77,6 +77,7 @@ func SetupDBInstance(mgr ctrl.Manager, o controller.Options) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		WithOptions(o.ForControllerRuntime()).
+		WithEventFilter(resource.DesiredStateChanged()).
 		For(&svcapitypes.DBInstance{}).
 		Complete(managed.NewReconciler(mgr,
 			resource.ManagedKind(svcapitypes.DBInstanceGroupVersionKind),
@@ -285,6 +286,7 @@ func lateInitialize(in *svcapitypes.DBInstanceParameters, out *svcsdk.DescribeDB
 	}
 	in.AutoMinorVersionUpgrade = aws.LateInitializeBoolPtr(in.AutoMinorVersionUpgrade, db.AutoMinorVersionUpgrade)
 	in.AvailabilityZone = aws.LateInitializeStringPtr(in.AvailabilityZone, db.AvailabilityZone)
+	in.CACertificateIdentifier = aws.LateInitializeStringPtr(in.CACertificateIdentifier, db.CACertificateIdentifier)
 	in.CharacterSetName = aws.LateInitializeStringPtr(in.CharacterSetName, db.CharacterSetName)
 	in.DBName = aws.LateInitializeStringPtr(in.DBName, db.DBName)
 	in.EnablePerformanceInsights = aws.LateInitializeBoolPtr(in.EnablePerformanceInsights, db.PerformanceInsightsEnabled)
