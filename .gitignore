@@ -5,6 +5,7 @@ cover.out
 /vendor
 /.vendor-new
 .registry
+build
 
 # ignore GoLand files (debug config etc...)
 /.idea
@@ -16,5 +17,6 @@ cover.out
 
 # ignore asdf local versions
 /.tool-versions
-
+code-generator
+build
 .DS_Store
