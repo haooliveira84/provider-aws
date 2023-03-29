@@ -10,10 +10,6 @@ CODE_GENERATOR_REPO ?= https://github.com/aws-controllers-k8s/code-generator.git
 CODE_GENERATOR_COMMIT ?= 6acf40fe3e3cfd97b799ef7cbf1e89e01c3db8f7
 GENERATED_SERVICES ?= $(shell find ./apis -type f -name generator-config.yaml | cut -d/ -f 3 | tr '\n' ' ')
 
-# Docker images
-DOCKER_REGISTRY = 574485109765.dkr.ecr.us-east-1.amazonaws.com/crossplane
-#-include build/makelib/image.mk
-
 # kind-related versions
 KIND_VERSION ?= v0.11.1
 KIND_NODE_IMAGE_TAG ?= v1.19.11
