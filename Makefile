@@ -16,7 +16,7 @@ KIND_NODE_IMAGE_TAG ?= v1.19.11
 
 # Docker images
 DOCKER_REPOSITORY = 574485109765.dkr.ecr.us-east-1.amazonaws.com/crossplane/provider-aws
-#include build/makelib/image.mk
+include build/makelib/image.mk
 
 # -include will silently skip missing files, which allows us
 # to load those files with a target in the Makefile. If only
@@ -60,7 +60,7 @@ UPTEST_VERSION = v0.5.0
 # Setup Images
 
 IMAGES = provider-aws
--include build/makelib/imagelight.mk
+#-include build/makelib/imagelight.mk
 
 # ====================================================================================
 # Setup XPKG
