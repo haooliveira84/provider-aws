@@ -14,10 +14,6 @@ GENERATED_SERVICES ?= $(shell find ./apis -type f -name generator-config.yaml | 
 KIND_VERSION ?= v0.11.1
 KIND_NODE_IMAGE_TAG ?= v1.19.11
 
-# Docker images
-DOCKER_REPOSITORY = 574485109765.dkr.ecr.us-east-1.amazonaws.com/crossplane/provider-aws
-include build/makelib/image.mk
-
 # -include will silently skip missing files, which allows us
 # to load those files with a target in the Makefile. If only
 # "include" was used, the make command would fail and refuse
